@@ -1,4 +1,8 @@
-export interface IUser {
+import { Document } from "mongoose";
+
+export interface IUser extends Document {
+    _id: string;
+    id?: string;
     image: string;
     name: string;
     email: string;
@@ -7,11 +11,9 @@ export interface IUser {
     isVarified: boolean;
     isActive: boolean;
     confirmPassword?: string;
-    _id?: string;
-    id?: string;
 }
 
-export interface ITokenUser {
+export interface ITokenUser extends Document {
     id: string;
     name: string;
     email: string;
