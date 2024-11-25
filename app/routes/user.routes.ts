@@ -4,10 +4,9 @@ import upload from '../helpers/imageUpload.helper';
 import { auth } from '../middlewares/auth.middleware';
 const route = Router();
 
-route.post('/register/user', upload.single('image'), userController.createUser);
-route.get('/account/confirmation/:token', userController.verifyEmail);
-route.post('/login/user', userController.loginUser);
-route.get('/fetch/user/:id', auth,userController.getUserProfile);
+route.post('/register', upload.single('image'), userController.createUser);
+route.post('/login', userController.loginUser);
+route.get('/fetch/profile/:id', auth,userController.getUserProfile);
 route.put('/update/user/:id', auth, upload.single('image'), userController.updateUserProfile);
 
 export default route;

@@ -2,18 +2,23 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 interface JwtPayload {
-  userId: string;
+  id: string;
+  name: string;
+  image: string;
+  email: string;
+  role: 'admin' | 'manager' | 'employee';
+  isVarified?: boolean;
 }
 
 declare global {
   namespace Express {
     interface Request {
-      user?: { id: string };
+      user?: JwtPayload;
     }
   }
 }
 
-export const auth = async ( req: Request, res: Response, next: NextFunction ): Promise<void> => {
+export const auth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const token = req.header('auth-token');
 
@@ -22,8 +27,8 @@ export const auth = async ( req: Request, res: Response, next: NextFunction ): P
       return;
     }
 
-    const decoded:JwtPayload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-    req.user = { id: decoded.userId };
+    const decoded: JwtPayload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+    req.user = { ...decoded };
     next();
   } catch (error) {
     res.status(401).json({ message: 'Invalid authentication token' });

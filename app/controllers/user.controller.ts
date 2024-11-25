@@ -1,18 +1,19 @@
 import { comparePassword, generateToken, hashPassword, sendVerificationEmail, verifyToken } from "../helpers/auth.helper";
 import { IUser, IMailOptions, IVerificationToken } from "../interfaces/user.interface";
 import { userModel, userValidator } from "../models/user.model";
-import { findOneBy } from "../repositories/user.repositories";
+import {userRepo} from "../repositories/user.repositories";
 import { Request, Response } from "express";
 import { unlink } from "fs";
 import path from "path";
 
 
-class userController {
+const userController = {
+
     async createUser(req: Request, res: Response): Promise<any> {
         try {
             const body: IUser = req.body;
 
-            const existUser: IUser | null = await findOneBy('email', body.email)
+            const existUser: IUser | null = await userRepo.findOneBy('email', body.email)
             if (existUser) {
                 return res.status(400).json({
                     message: "Email already exists!",
@@ -80,7 +81,7 @@ class userController {
                 error: error,
             })
         }
-    }
+    },
 
     async verifyEmail(req: Request, res: Response): Promise<any> {
         try {
@@ -88,7 +89,7 @@ class userController {
 
             const tokenData: IVerificationToken = await verifyToken(verificationToken)
 
-            const user: IUser | null = await findOneBy( 'email', tokenData.email );
+            const user: IUser | null = await userRepo.findOneBy( 'email', tokenData.email );
 
             if (!user) {
                 return res.status(400).json({
@@ -104,12 +105,12 @@ class userController {
             console.error("error: ", error);
             return res.redirect(`http://localhost:4200/login?verified=false`);
         }
-    }
+    },
 
     async loginUser(req: Request, res: Response): Promise<any> {
         try {
             const { email, password } = req.body;
-            const user: IUser | null = await findOneBy( 'email', email );
+            const user: IUser | null = await userRepo.findOneBy( 'email', email );
 
             if (!user) {
                 return res.status(400).json({
@@ -153,7 +154,7 @@ class userController {
                 error: error,
             })
         }
-    }
+    },
 
     async getUserProfile(req: Request, res: Response): Promise<any> {
         try {
@@ -180,7 +181,7 @@ class userController {
                 error: error,
             })
         }
-    }
+    },
 
     async updateUserProfile(req: Request, res: Response): Promise<any> {
         try {
@@ -233,6 +234,7 @@ class userController {
             })
         }
     }
+    
 }
 
-export default new userController();
+export default userController;

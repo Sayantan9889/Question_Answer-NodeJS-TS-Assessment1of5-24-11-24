@@ -1,7 +1,31 @@
 import { Request, Response } from 'express';
 import { questionModel, questionValidator } from '../models/questions.model';
 import { answerModel, answerValidator } from '../models/answers.model';
-import categoryModel from '../models/categories.model';
+import { categoryModel } from '../models/categories.model';
+
+const questionController = {
+    async createQuestion(req: Request, res: Response): Promise<any> {
+        try {
+            const { title, content, categories, createdBy } = req.body;
+
+            const question = await questionModel.create({ title, content, categories, createdBy });
+
+            res.status(201).json({ message: 'Question created successfully', question });
+        } catch (error:any) {
+            res.status(500).json({
+                status: 500,
+                message: error.message || 'Something went wrong! Please try again.',
+                error: error,
+            });
+        }
+    },
+
+    
+}
+
+
+
+
 
 export const getQuestionsByCategory = async (req: Request, res: Response): Promise<void> => {
     try {
