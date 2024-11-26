@@ -1,16 +1,26 @@
 import { Request, Response } from 'express';
-import { questionModel, questionValidator } from '../models/questions.model';
-import { answerModel, answerValidator } from '../models/answers.model';
 import { categoryModel } from '../models/categories.model';
+import questionRepo from '../repositories/question.repository';
+import { IQuestion } from '../interfaces/question.interface';
 
-const questionController = {
+class questionController {
+
     async createQuestion(req: Request, res: Response): Promise<any> {
         try {
-            const { title, content, categories, createdBy } = req.body;
+            const body:any = {
+                title: req.body.title,
+                content: req.body.content,
+                categories: req.body.categories,
+                createdBy: req.body.createdBy,
+            }
 
-            const question = await questionModel.create({ title, content, categories, createdBy });
+            const question = await questionRepo.save(body);
 
-            res.status(201).json({ message: 'Question created successfully', question });
+            res.status(200).json({ 
+                status: 200,
+                message: 'Question created successfully', 
+                data: question 
+            });
         } catch (error:any) {
             res.status(500).json({
                 status: 500,
@@ -18,159 +28,143 @@ const questionController = {
                 error: error,
             });
         }
-    },
+    }
 
     
 }
 
+export default new questionController();
 
 
 
 
-export const getQuestionsByCategory = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { categoryId } = req.params;
 
-        const questions = await questionModel.aggregate([
-            {
-                $match: {
-                    categories: categoryId
-                }
-            },
-            {
-                $lookup: {
-                    from: 'categories',
-                    localField: 'categories',
-                    foreignField: '_id',
-                    as: 'categoryDetails'
-                }
-            },
-            {
-                $lookup: {
-                    from: 'answers',
-                    localField: '_id',
-                    foreignField: 'question',
-                    as: 'answers'
-                }
-            },
-            {
-                $project: {
-                    title: 1,
-                    content: 1,
-                    categoryDetails: 1,
-                    createdAt: 1,
-                    answerCount: { $size: '$answers' }
-                }
-            }
-        ]);
+// export const getQuestionsByCategory = async (req: Request, res: Response): Promise<void> => {
+//     try {
+//         const { categoryId } = req.params;
 
-        res.json(questions);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching questions', error });
-    }
-};
+//         const questions = await questionModel.aggregate([
+//             {
+//                 $match: {
+//                     categories: categoryId
+//                 }
+//             },
+//             {
+//                 $lookup: {
+//                     from: 'categories',
+//                     localField: 'categories',
+//                     foreignField: '_id',
+//                     as: 'categoryDetails'
+//                 }
+//             },
+//             {
+//                 $lookup: {
+//                     from: 'answers',
+//                     localField: '_id',
+//                     foreignField: 'question',
+//                     as: 'answers'
+//                 }
+//             },
+//             {
+//                 $project: {
+//                     title: 1,
+//                     content: 1,
+//                     categoryDetails: 1,
+//                     createdAt: 1,
+//                     answerCount: { $size: '$answers' }
+//                 }
+//             }
+//         ]);
 
-export const submitAnswer = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { questionId } = req.params;
-        const { content, timezone } = req.body;
+//         res.json(questions);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error fetching questions', error });
+//     }
+// };
 
-        const answer = new answerModel({
-            question: questionId,
-            user: req.user?.id,
-            content,
-            userTimezone: timezone
-        });
 
-        await answer.save();
-        res.status(201).json(answer);
-    } catch (error) {
-        res.status(500).json({ message: 'Error submitting answer', error });
-    }
-};
+// export const searchQuestions = async (req: Request, res: Response): Promise<void> => {
+//     try {
+//         const { query } = req.query;
 
-export const searchQuestions = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { query } = req.query;
+//         const questions = await questionModel.aggregate([
+//             {
+//                 $match: {
+//                     $or: [
+//                         { title: { $regex: query, $options: 'i' } },
+//                         { content: { $regex: query, $options: 'i' } }
+//                     ]
+//                 }
+//             },
+//             {
+//                 $lookup: {
+//                     from: 'answers',
+//                     localField: '_id',
+//                     foreignField: 'question',
+//                     as: 'answers'
+//                 }
+//             },
+//             {
+//                 $lookup: {
+//                     from: 'users',
+//                     localField: 'answers.user',
+//                     foreignField: '_id',
+//                     as: 'userAnswers'
+//                 }
+//             },
+//             {
+//                 $project: {
+//                     title: 1,
+//                     content: 1,
+//                     answers: {
+//                         $map: {
+//                             input: '$answers',
+//                             as: 'answer',
+//                             in: {
+//                                 content: '$$answer.content',
+//                                 user: {
+//                                     $arrayElemAt: [
+//                                         '$userAnswers',
+//                                         { $indexOfArray: ['$answers.user', '$$answer.user'] }
+//                                     ]
+//                                 },
+//                                 submittedAt: '$$answer.submittedAt',
+//                                 userTimezone: '$$answer.userTimezone'
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         ]);
 
-        const questions = await questionModel.aggregate([
-            {
-                $match: {
-                    $or: [
-                        { title: { $regex: query, $options: 'i' } },
-                        { content: { $regex: query, $options: 'i' } }
-                    ]
-                }
-            },
-            {
-                $lookup: {
-                    from: 'answers',
-                    localField: '_id',
-                    foreignField: 'question',
-                    as: 'answers'
-                }
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'answers.user',
-                    foreignField: '_id',
-                    as: 'userAnswers'
-                }
-            },
-            {
-                $project: {
-                    title: 1,
-                    content: 1,
-                    answers: {
-                        $map: {
-                            input: '$answers',
-                            as: 'answer',
-                            in: {
-                                content: '$$answer.content',
-                                user: {
-                                    $arrayElemAt: [
-                                        '$userAnswers',
-                                        { $indexOfArray: ['$answers.user', '$$answer.user'] }
-                                    ]
-                                },
-                                submittedAt: '$$answer.submittedAt',
-                                userTimezone: '$$answer.userTimezone'
-                            }
-                        }
-                    }
-                }
-            }
-        ]);
+//         res.json(questions);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error searching questions', error });
+//     }
+// };
 
-        res.json(questions);
-    } catch (error) {
-        res.status(500).json({ message: 'Error searching questions', error });
-    }
-};
+// export const getCategoriesWithCount = async (req: Request, res: Response): Promise<void> => {
+//     try {
+//         const categories = await categoryModel.aggregate([
+//             {
+//                 $lookup: {
+//                     from: 'questions',
+//                     localField: '_id',
+//                     foreignField: 'categories',
+//                     as: 'questions'
+//                 }
+//             },
+//             {
+//                 $project: {
+//                     name: 1,
+//                     description: 1,
+//                     questionCount: { $size: '$questions' }
+//                 }
+//             }
+//         ]);
 
-export const getCategoriesWithCount = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const categories = await categoryModel.aggregate([
-            {
-                $lookup: {
-                    from: 'questions',
-                    localField: '_id',
-                    foreignField: 'categories',
-                    as: 'questions'
-                }
-            },
-            {
-                $project: {
-                    name: 1,
-                    description: 1,
-                    questionCount: { $size: '$questions' }
-                }
-            }
-        ]);
-
-        res.json(categories);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching categories', error });
-    }
-};
+//         res.json(categories);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error fetching categories', error });
+//     }
+// };

@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
-import { categoryModel, ICategory } from '../models/categories.model';
-import { findOneBy } from '../repositories/common.repository';
+import { ICategory } from '../models/categories.model';
+import categoryRepo from '../repositories/category.repository';
 
 class categoryController {
-    async createCategory(req: Request, res: Response): Promise<any> {
+
+    createCategory = async (req: Request, res: Response): Promise<any> => {
         try {
-            const existingCategory:ICategory = await findOneBy(categoryModel, "name", req.body.name) as ICategory;
+            const existingCategory:ICategory = await categoryRepo.findOneBy({name: req.body.name}) as ICategory;
             if (existingCategory) {
                 return res.status(400).json({
                     status: 400,
@@ -13,8 +14,7 @@ class categoryController {
                 });
             }
 
-            const newCategory = new categoryModel(req.body);
-            await newCategory.save();
+            const newCategory = await categoryRepo.save(req.body);
 
             res.status(201).json({
                 status: 201,

@@ -1,12 +1,39 @@
 import { Model } from "mongoose";
+abstract class commonRepo {
+    // abstract model: Model<any>;
 
-export const findOneBy = async (model: Model<any>,key:string, value: string):Promise<any> => {
-    console.log("value: ", value);
-    console.log("key: ", key);
-    try {
-        const category: Array<any> = await model.aggregate([{ $match: { [key]: value } }]);
-        return category.length > 0? category[0] : null;
-    } catch (error: any) {
-        throw new Error(error.message || 'Something went wrong while finding user!');
+    model!: Model<any>;
+    constructor(model: Model<any>) {
+        this.model = model;
+    }
+
+    async _findOne(param:any): Promise<any> {
+        try {
+            const doc: Array<any> = await this.model.aggregate([{ $match: param }]);
+            return doc.length > 0 ? doc[0] : null;
+        } catch (error: any) {
+            throw error;
+        }
+    }
+
+    async _findById(id:string): Promise<any> {
+        try {
+            const doc = await this.model.findById(id);
+            return doc ? doc : null;
+        } catch (error: any) {
+            throw error;
+        }
+    }
+
+    async _save(data:any): Promise<any> {
+        try {
+            const newDoc = new this.model(data);
+            await newDoc.save();
+            return newDoc;
+        } catch (error: any) {
+            throw error;
+        }
     }
 }
+
+export default commonRepo;

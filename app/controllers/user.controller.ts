@@ -1,7 +1,7 @@
 import { comparePassword, generateToken, hashPassword, sendVerificationEmail, verifyToken } from "../helpers/auth.helper";
 import { IUser, IMailOptions, IVerificationToken } from "../interfaces/user.interface";
 import { userModel, userValidator } from "../models/user.model";
-import {userRepo} from "../repositories/user.repositories";
+import { userRepo } from "../repositories/user.repositories";
 import { Request, Response } from "express";
 import { unlink } from "fs";
 import path from "path";
@@ -89,7 +89,7 @@ const userController = {
 
             const tokenData: IVerificationToken = await verifyToken(verificationToken)
 
-            const user: IUser | null = await userRepo.findOneBy( 'email', tokenData.email );
+            const user: IUser | null = await userRepo.findOneBy('email', tokenData.email);
 
             if (!user) {
                 return res.status(400).json({
@@ -110,7 +110,7 @@ const userController = {
     async loginUser(req: Request, res: Response): Promise<any> {
         try {
             const { email, password } = req.body;
-            const user: IUser | null = await userRepo.findOneBy( 'email', email );
+            const user: IUser | null = await userRepo.findOneBy('email', email);
 
             if (!user) {
                 return res.status(400).json({
@@ -234,7 +234,7 @@ const userController = {
             })
         }
     }
-    
+
 }
 
 export default userController;

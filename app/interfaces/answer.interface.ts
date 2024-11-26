@@ -4,6 +4,6 @@ export interface IAnswer extends Document {
     question: Types.ObjectId;
     user: Types.ObjectId;
     content: string;
-    submittedAt: Date;
+    submittedAt?: Date;
     userTimezone: string;
 }
