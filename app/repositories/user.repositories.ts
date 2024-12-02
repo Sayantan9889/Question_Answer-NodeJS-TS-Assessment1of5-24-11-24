@@ -9,7 +9,5 @@ export const userRepo = {
         } catch (error: any) {
             throw new Error(error.message || 'Something went wrong while finding user!');
         }
-    },
-    def: () => {},
-    jhk: () => {}
+    }
 }

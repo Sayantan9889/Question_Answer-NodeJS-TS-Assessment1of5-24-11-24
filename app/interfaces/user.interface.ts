@@ -11,6 +11,7 @@ export interface IUser extends Document {
     isVarified: boolean;
     isActive: boolean;
     confirmPassword?: string;
+    timeZone?:string;
 }
 
 export interface ITokenUser extends Document {
@@ -30,3 +31,12 @@ export interface IMailOptions {
 export interface IVerificationToken {
     email: string;
 }
+
+export interface JwtPayload {
+    id: string;
+    name: string;
+    image: string;
+    email: string;
+    role: 'admin' | 'user';
+    isVarified?: boolean;
+  }

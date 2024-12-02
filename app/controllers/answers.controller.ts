@@ -22,3 +22,5 @@ class answerController {
         }
     }
 }
+
+export default new answerController();

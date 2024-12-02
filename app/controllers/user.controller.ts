@@ -7,7 +7,7 @@ import { unlink } from "fs";
 import path from "path";
 
 
-const userController = {
+class userController {
 
     async createUser(req: Request, res: Response): Promise<any> {
         try {
@@ -81,7 +81,7 @@ const userController = {
                 error: error,
             })
         }
-    },
+    }
 
     async verifyEmail(req: Request, res: Response): Promise<any> {
         try {
@@ -114,7 +114,7 @@ const userController = {
                 error: error,
             });
         }
-    },
+    }
 
     async loginUser(req: Request, res: Response): Promise<any> {
         try {
@@ -146,6 +146,7 @@ const userController = {
             }
 
             const token: string = await generateToken({ id: user._id, name: user.name, email: user.email, role: user.role });
+            res.cookie('x-access-token', token, { expires: new Date(Date.now() + 24 * 60 * 60 * 1000) });
 
             const _user = { ...(user as any)._doc, token }
             delete _user.password;
@@ -163,7 +164,15 @@ const userController = {
                 error: error,
             })
         }
-    },
+    }
+
+    async logoutUser(req:Request, res:Response) {
+        try {
+            req.user = undefined;
+            res.clearCookie('x-access-token');
+        } catch (error) {
+        }
+    }
 
     async getUserProfile(req: Request, res: Response): Promise<any> {
         try {
@@ -190,7 +199,7 @@ const userController = {
                 error: error,
             })
         }
-    },
+    }
 
     async updateUserProfile(req: Request, res: Response): Promise<any> {
         try {
@@ -246,4 +255,4 @@ const userController = {
 
 }
 
-export default userController;
+export default new userController();

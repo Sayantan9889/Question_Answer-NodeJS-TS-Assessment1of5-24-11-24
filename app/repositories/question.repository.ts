@@ -28,7 +28,40 @@ class questionRepo extends commonRepo {
         try {
             console.log("categoryId: ", categoryId);
             const questions = questionModel.aggregate([
-                { $match: { categories: categoryId } },
+                { 
+                    $match: { 
+                        categories: categoryId
+                    } 
+                },
+                // {
+                //     $lookup: {
+                //         from: "categories",
+                //         localField: "categories",
+                //         foreignField: "_id",
+                //         as: "categoryDetails"
+                //     }
+                // },
+                {
+                    $lookup: {
+                        from:"users",
+                        localField: "createdBy",
+                        foreignField: "_id",
+                        as: "createdBy"
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        title: 1,
+                        categories: 1,
+                        createdAt: 1,
+                        createdBy: {
+                            _id: 1,
+                            name: 1,
+                            email: 1
+                        }
+                    }
+                }
             ]);
             return questions;
         } catch (error) {
@@ -41,7 +74,7 @@ class questionRepo extends commonRepo {
             const questions = questionModel.aggregate([
                 {
                     $sort: {
-                        createdBy: -1
+                        createdAt: -1
                     }
                 },
                 {

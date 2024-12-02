@@ -10,7 +10,8 @@ const userValidator: ObjectSchema<IUser> = joi.object({
     password: joi.string().min(8).required(),
     role: joi.string(), //.valid('admin', 'manager', 'employee').optional(),
     isVarified: joi.boolean().default(false),
-    isActive: joi.boolean().default(false)
+    isActive: joi.boolean().default(false),
+    timeZone: joi.string()
 });
 
 const userSchema: Schema<IUser> = new Schema({
@@ -42,7 +43,8 @@ const userSchema: Schema<IUser> = new Schema({
     isActive: {
         type: Boolean,
         default: false
-    }
+    },
+    timeZone: { type: String, default: 'UTC' },
 }, { timestamps: true, versionKey: false });
 
 const userModel: Model<IUser> = model('User', userSchema);

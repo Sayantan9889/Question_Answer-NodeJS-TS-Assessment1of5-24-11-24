@@ -4,6 +4,7 @@ import { json, urlencoded } from "body-parser";
 import cors from "cors";
 import { config } from "dotenv";
 import { join } from "path";
+import cookieParser from "cookie-parser";
 import routes from './app/routes/main.routes';
 
 // Initialize Express app
@@ -19,12 +20,16 @@ connectDB();
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
+// Middleware to parse cookies
+app.use(cookieParser());
+
 // Enable CORS for cross-origin requests
 app.use(cors());
 
 // static folder
 app.use('/uploads', express.static(join(__dirname, 'uploads')))
 
+// routers
 app.use(routes);
 
 const port = process.env.PORT || 9000;

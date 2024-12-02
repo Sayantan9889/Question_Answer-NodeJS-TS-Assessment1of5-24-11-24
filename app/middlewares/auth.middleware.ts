@@ -1,14 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { JwtPayload } from '../interfaces/user.interface';
 
-interface JwtPayload {
-  id: string;
-  name: string;
-  image: string;
-  email: string;
-  role: 'admin' | 'user';
-  isVarified?: boolean;
-}
 
 declare global {
   namespace Express {
@@ -20,7 +13,7 @@ declare global {
 
 export const auth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const token = req.header('auth-token');
+    const token = req.cookies['x-access-token'] || req.headers["x-access-token"] || req.body['x-access-token'] || req.query['x-access-token'];
 
     if (!token) {
       res.status(401).json({ message: 'No authentication token provided' });
