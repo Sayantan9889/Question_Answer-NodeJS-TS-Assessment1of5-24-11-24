@@ -14,7 +14,7 @@ class categoryRepo extends commonRepo{
             const newCategory:ICategory|null = await this._save(data);
             return newCategory;
         } catch (error:any) {
-            throw new Error(error.message || 'Something went wrong while saving category!');
+            throw error;
         }
     }
 
@@ -23,7 +23,7 @@ class categoryRepo extends commonRepo{
             const user: Array<ICategory> = await this._findOne(param);
             return user.length > 0? user[0] : null;
         } catch (error: any) {
-            throw new Error(error.message || 'Something went wrong while finding user!');
+            throw error;
         }
     }
 }

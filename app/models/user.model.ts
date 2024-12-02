@@ -32,8 +32,8 @@ const userSchema: Schema<IUser> = new Schema({
     },
     role: {
         type: String,
-        enum: ['admin', 'manager', 'employee'],
-        default: 'employee'
+        enum: ['admin', 'user'],
+        default: 'user'
     },
     isVarified: {
         type: Boolean,

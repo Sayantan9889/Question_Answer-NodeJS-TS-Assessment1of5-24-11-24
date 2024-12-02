@@ -4,7 +4,6 @@ import { IQuestion } from '../interfaces/question.interface';
 
 const questionValidator:ObjectSchema<IQuestion> = Joi.object({
     title: Joi.string().min(3).max(100).required(),
-    content: Joi.string().min(10).required(),
     categories: Joi.array().items(Joi.string()).required(),
     createdBy: Joi.string().required()
 });
@@ -14,10 +13,6 @@ const questionSchema = new Schema<IQuestion>({
     type: String,
     required: true,
     trim: true,
-  },
-  content: {
-    type: String,
-    required: true,
   },
   categories: [{
     type: Schema.Types.ObjectId,

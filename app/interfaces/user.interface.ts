@@ -7,7 +7,7 @@ export interface IUser extends Document {
     name: string;
     email: string;
     password: string;
-    role?: 'admin'|'manager'|'employee';
+    role?: 'admin'|'user';
     isVarified: boolean;
     isActive: boolean;
     confirmPassword?: string;

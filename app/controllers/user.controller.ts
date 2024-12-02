@@ -30,12 +30,12 @@ const userController = {
             body.password = hashedPassword;
             delete body.confirmPassword;
 
-            const file: any = (req.files as any)[0];
+            const file: any = req.file;
             const basePath: string = `${req.protocol}://${req.get('host')}`;
             let imagePath: string = `${basePath}/uploads/blank-profile-pic.jpg`;
             if (file) {
                 imagePath = `${basePath}/uploads/${file.filename}`;
-                console.log("imagePath: ", imagePath);
+                // console.log("imagePath: ", imagePath);
             }
             body.image = imagePath;
 
@@ -50,7 +50,7 @@ const userController = {
 
             const verificationToken: string = await generateToken({ email: body.email });
 
-            let verification_mail: string = `http://${req.headers.host}/api/account/confirmation/${verificationToken}`;
+            let verification_mail: string = `http://${req.headers.host}/account/confirmation/${verificationToken}`;
             const mailOptions: IMailOptions = {
                 from: 'no-reply@sayantan.com',
                 to: body.email,
@@ -100,10 +100,19 @@ const userController = {
 
             await userModel.findByIdAndUpdate(user._id, { isVarified: true, isActive: true });
 
-            return res.redirect(`http://localhost:4200/login?verified=true`);
+            // return res.redirect(`http://localhost:4200/login?verified=true`);
+            return res.status(200).json({
+                status: 200,
+                message: "Email verified successfully! You can now login.",
+            });
         } catch (error: any) {
             console.error("error: ", error);
-            return res.redirect(`http://localhost:4200/login?verified=false`);
+            // return res.redirect(`http://localhost:4200/login?verified=false`);
+            return res.status(500).json({
+                status: 500,
+                message: error.message || "Something went wrong! Please try again.",
+                error: error,
+            });
         }
     },
 

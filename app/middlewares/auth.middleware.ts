@@ -6,7 +6,7 @@ interface JwtPayload {
   name: string;
   image: string;
   email: string;
-  role: 'admin' | 'manager' | 'employee';
+  role: 'admin' | 'user';
   isVarified?: boolean;
 }
 

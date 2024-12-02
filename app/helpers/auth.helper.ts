@@ -50,7 +50,7 @@ export const mailTransporter = async ():Promise<Transporter<any>> => {
             secure: false, // true for port 465, false for other ports
             auth: {
                 user: process.env.GMAIL!,
-                pass: process.env.GMAIL_PASSWORD?.replace(/[\/\\-]/g, ''),
+                pass: process.env.GMAIL_PASSWORD     //?.replace(/[\/\\-]/g, ''),
             },
         });
     } catch (error:any) {
