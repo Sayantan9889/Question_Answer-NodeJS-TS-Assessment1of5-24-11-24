@@ -7,11 +7,11 @@ export interface IUser extends Document {
     name: string;
     email: string;
     password: string;
-    role?: 'admin'|'user';
+    role: 'admin'|'user';
     isVarified: boolean;
     isActive: boolean;
     confirmPassword?: string;
-    timeZone?:string;
+    timeZone:string;
 }
 
 export interface ITokenUser extends Document {
@@ -19,6 +19,7 @@ export interface ITokenUser extends Document {
     name: string;
     email: string;
     role: string;
+    timeZone: string;
 }
 
 export interface IMailOptions {
@@ -39,4 +40,5 @@ export interface JwtPayload {
     email: string;
     role: 'admin' | 'user';
     isVarified?: boolean;
+    timeZone?: string;
   }

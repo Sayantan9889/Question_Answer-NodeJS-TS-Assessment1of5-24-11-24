@@ -6,15 +6,13 @@ class answerController {
     async submitAnswer (req: Request, res: Response): Promise<void> {
         try {
             const { questionId } = req.params;
-            const { content, timezone } = req.body;
-
+            const { content } = req.body;
             const body:any = {
                 question: questionId,
                 user: req.user?.id,
                 content,
-                userTimezone: timezone
+                userTimezone: req.user?.timeZone
             }
-    
             const answer:IAnswer|null = await answerRepo.save(body);
             res.status(201).json(answer);
         } catch (error) {

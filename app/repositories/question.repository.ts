@@ -1,8 +1,8 @@
 import { questionModel, questionValidator } from '../models/questions.model';
-import { categoryModel } from '../models/categories.model';
 import { IQuestion } from '../interfaces/question.interface';
 import commonRepo from './common.repository';
-import { ObjectId, Types } from 'mongoose';
+import { Types } from 'mongoose';
+import { Request } from 'express';
 
 
 class questionRepo extends commonRepo {
@@ -28,10 +28,10 @@ class questionRepo extends commonRepo {
         try {
             console.log("categoryId: ", categoryId);
             const questions = questionModel.aggregate([
-                { 
-                    $match: { 
+                {
+                    $match: {
                         categories: categoryId
-                    } 
+                    }
                 },
                 // {
                 //     $lookup: {
@@ -43,7 +43,7 @@ class questionRepo extends commonRepo {
                 // },
                 {
                     $lookup: {
-                        from:"users",
+                        from: "users",
                         localField: "createdBy",
                         foreignField: "_id",
                         as: "createdBy"
@@ -114,6 +114,76 @@ class questionRepo extends commonRepo {
                         "name": "$category.name",
                         "description": "$category.description",
                         "question": "$category.question",
+                    }
+                }
+            ]);
+            return questions;
+        } catch (error) {
+            throw error;
+        }
+    }
+    async fetchAllQuestionCategoriesWise1(req: Request): Promise<any> {
+        try {
+            const userId = req.user?.id;
+            console.log("userId: ", userId);
+
+            const questions = questionModel.aggregate([
+                {
+                    $unwind: {
+                        path: '$categories',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$categories",
+                        questions: { $push: "$$ROOT" }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'categories',
+                        localField: '_id',
+                        foreignField: '_id',
+                        as: 'category',
+                    }
+                },
+                {
+                    $unwind: {
+                        path: '$category',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $addFields: {
+                        "category.question": "$questions",
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'answers',
+                        let: { userId: userId },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            { $eq: ['$user', '$$userId'] },
+                                        ]
+                                    }
+                                }
+                            }
+                        ],
+                        as: 'answer_data',
+                    }
+                },
+                {
+                    $project: {
+                        "category": "$category.category",
+                        "name": "$category.name",
+                        "description": "$category.description",
+                        "question": "$category.question",
+                        "answer_data": '$answer_data',
                     }
                 }
             ]);

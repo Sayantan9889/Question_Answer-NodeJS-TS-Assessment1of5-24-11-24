@@ -9,6 +9,7 @@ class questionController {
     async createQuestion(req: Request, res: Response): Promise<any> {
         try {
             const body:IQuestion = req.body;
+            req.user && (body.createdBy = (req.user.id as any));
 
             const question = await questionRepo.save(body);
 
@@ -65,6 +66,58 @@ class questionController {
             });
         }
     }
+
+    async getAllQuestionCategoryWise1 (req: Request, res: Response): Promise<any> {
+        try {
+            const questions = await questionRepo.fetchAllQuestionCategoriesWise1(req);
+
+            res.status(200).json({
+                status: 200,
+                message: 'Questions fetched successfully!',
+                data: questions,
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: 500,
+                message: 'Internal server error!',
+                error
+            });
+        }
+    }
+
+    // async getAllCategoryWithQuestionsCount (req: Request, res: Response): Promise<any> {
+    //     try {
+    //         const categories = await categoryModel.aggregate([
+    //             {
+    //                 $lookup: {
+    //                     from: 'questions',
+    //                     localField: '_id',
+    //                     foreignField: 'categories',
+    //                     as: 'questions'
+    //                 }
+    //             },
+    //             {
+    //                 $project: {
+    //                     _id: 1,
+    //                     name: 1,
+    //                     questionCount: { $size: '$questions' }
+    //                 }
+    //             }
+    //         ]);
+
+    //         res.status(200).json({
+    //             status: 200,
+    //             message: 'Categories fetched successfully!',
+    //             data: categories,
+    //         });
+    //     } catch (error) {
+    //         res.status(500).json({
+    //             status: 500,
+    //             message: 'Internal server error!',
+    //             error
+    //         });
+    //     }
+    // }
 }
 
 export default new questionController();

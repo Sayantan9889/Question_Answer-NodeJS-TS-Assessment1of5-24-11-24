@@ -29,6 +29,25 @@ class categoryController {
             });
         }
     }
+
+
+    async getAllCategoryWithQuestionsCount (req: Request, res: Response): Promise<any> {
+        try {
+            const categories = await categoryRepo.fetchAllCategoryWithQuestionsCount();
+
+            res.status(200).json({
+                status: 200,
+                message: 'Categories fetched successfully!',
+                data: categories,
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: 500,
+                message: 'Internal server error!',
+                error
+            });
+        }
+    }
 }
 
 export default new categoryController();

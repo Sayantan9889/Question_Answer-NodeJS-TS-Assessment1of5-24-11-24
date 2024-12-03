@@ -120,63 +120,73 @@ class userController {
         try {
             const { email, password } = req.body;
             const user: IUser | null = await userRepo.findOneBy('email', email);
-
-            if (!user) {
+    
+            if (!user || !user.isVarified || !(await comparePassword(password, user.password))) {
                 return res.status(400).json({
                     status: 400,
-                    message: "Invalid email or password!",
+                    message: !user ? "Invalid email or password!" :
+                              !user.isVarified ? "Your account is not verified. Please check your email for the verification link." :
+                              "Invalid email or password!"
                 });
             }
-
-            if (!user.isVarified) {
-                return res.status(400).json({
-                    status: 400,
-                    message: "Your account is not verified! Please verify your account by clicking the link sent to your mail.",
-                });
-            }
-
-
-            const isPasswordMatch: boolean = await comparePassword(password, user.password);
-
-            if (!isPasswordMatch) {
-                return res.status(400).json({
-                    status: 400,
-                    message: "Invalid email or password!",
-                });
-            }
-
-            const token: string = await generateToken({ id: user._id, name: user.name, email: user.email, role: user.role });
-            res.cookie('x-access-token', token, { expires: new Date(Date.now() + 24 * 60 * 60 * 1000) });
-
-            const _user = { ...(user as any)._doc, token }
-            delete _user.password;
-
+    
+            const token: string = await generateToken({
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                timeZone: user.timeZone,
+            });
+    
+            res.cookie('x-access-token', token, {
+                expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production'
+            });
+    
+            const userResponse = {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                image: user.image,
+                token
+            };
+    
             return res.status(200).json({
                 status: 200,
                 message: `Welcome ${user.name}!`,
-                data: _user
+                data: userResponse
             });
         } catch (error: any) {
-            console.log("error: ", error);
+            console.error("Login error:", error);
             return res.status(500).json({
                 status: 500,
-                message: error.message || "Something went wrong! Please try again.",
-                error: error,
-            })
+                message: "An unexpected error occurred. Please try again later.",
+            });
         }
     }
 
-    async logoutUser(req:Request, res:Response) {
+    async logoutUser(req:Request, res:Response):Promise<any> {
         try {
             req.user = undefined;
             res.clearCookie('x-access-token');
+            return res.status(200).json({
+                status: 200,
+                message: "Logged out successfully!"
+            });
         } catch (error) {
+            console.error("Logout error:", error);
+            return res.status(500).json({
+                status: 500,
+                message: "An unexpected error occurred. Please try again later.",
+            });
         }
     }
 
     async getUserProfile(req: Request, res: Response): Promise<any> {
         try {
-            const userId: string = req.body.id;
+            const userId: string = req.params.id;
             const user: IUser | null = await userModel.findById(userId).select('-isActive -isVarified -updated_at -password');
 
             if (!user) {

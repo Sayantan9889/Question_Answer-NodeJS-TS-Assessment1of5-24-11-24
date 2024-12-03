@@ -3,7 +3,7 @@ import Joi, { ObjectSchema } from 'joi';
 import { IQuestion } from '../interfaces/question.interface';
 
 const questionValidator:ObjectSchema<IQuestion> = Joi.object({
-    title: Joi.string().min(3).max(100).required(),
+    title: Joi.string().min(5).max(300).required(),
     categories: Joi.array().items(Joi.string()).required(),
     createdBy: Joi.string().required()
 });
