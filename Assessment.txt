@@ -12,7 +12,7 @@ Assignment – I 
         e.List of questions for each category (done)
         f.Users will be able to submit answers to their respective questions. (Done)
         g.Search By Question with answer submitted by user with submit time based on user's time zone. ()
-        h.List of all categories along with total questions count of those category. ()
+        h.List of all categories along with total questions count of those category. (Done)
 
     Note:  
         1.A single question can be assigned to multiple categories and should be Multiple choice questions. 

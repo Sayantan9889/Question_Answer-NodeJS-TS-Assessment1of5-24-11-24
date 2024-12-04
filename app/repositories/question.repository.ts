@@ -122,68 +122,18 @@ class questionRepo extends commonRepo {
             throw error;
         }
     }
-    async fetchAllQuestionCategoriesWise1(req: Request): Promise<any> {
+    async fetchQuestionwithAnswers(req: Request): Promise<any> {
         try {
             const userId = req.user?.id;
             console.log("userId: ", userId);
 
             const questions = questionModel.aggregate([
                 {
-                    $unwind: {
-                        path: '$categories',
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $group: {
-                        _id: "$categories",
-                        questions: { $push: "$$ROOT" }
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'categories',
-                        localField: '_id',
-                        foreignField: '_id',
-                        as: 'category',
-                    }
-                },
-                {
-                    $unwind: {
-                        path: '$category',
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $addFields: {
-                        "category.question": "$questions",
-                    }
-                },
-                {
                     $lookup: {
                         from: 'answers',
-                        let: { userId: userId },
-                        pipeline: [
-                            {
-                                $match: {
-                                    $expr: {
-                                        $and: [
-                                            { $eq: ['$user', '$$userId'] },
-                                        ]
-                                    }
-                                }
-                            }
-                        ],
-                        as: 'answer_data',
-                    }
-                },
-                {
-                    $project: {
-                        "category": "$category.category",
-                        "name": "$category.name",
-                        "description": "$category.description",
-                        "question": "$category.question",
-                        "answer_data": '$answer_data',
+                        localField: '_id',
+                        foreignField: 'question',
+                        as: 'answers'
                     }
                 }
             ]);

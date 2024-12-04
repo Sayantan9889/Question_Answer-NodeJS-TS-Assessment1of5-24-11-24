@@ -7,7 +7,7 @@ const router = Router();
 // Question routes
 router.post('/create', auth, questionsController.createQuestion);
 router.get('/fetch/category-wise', questionsController.getAllQuestionCategoryWise);
-router.get('/fetch/category-wise-1', questionsController.getAllQuestionCategoryWise1);
+router.get('/fetch/with-answer', questionsController.getQuestionwithAnswers);
 router.get('/fetch/:id', questionsController.getQuestionByCategoryId);
 
 export default router;

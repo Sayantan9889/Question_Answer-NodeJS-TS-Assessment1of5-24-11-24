@@ -67,15 +67,40 @@ class questionController {
         }
     }
 
-    async getAllQuestionCategoryWise1 (req: Request, res: Response): Promise<any> {
+    async getQuestionwithAnswers(req: Request, res: Response): Promise<any>{
         try {
-            const questions = await questionRepo.fetchAllQuestionCategoriesWise1(req);
-
+            const question = await questionRepo.fetchQuestionwithAnswers(req);
             res.status(200).json({
                 status: 200,
-                message: 'Questions fetched successfully!',
-                data: questions,
+                message: 'Question fetched successfully!',
+                data: question,
             });
+
+
+
+
+            // const questions = await questionModel.aggregate([
+            //     {
+            //         $lookup: {
+            //             from: 'answers',
+            //             localField: '_id',
+            //             foreignField: 'question',
+            //             as: 'answers'
+            //         }
+            //     },
+            //     {
+            //         $unwind: '$answers'
+            //     },
+            //     {
+            //         $group: {
+            //             _id: '$_id',
+            //             title: { $first: '$title' },
+            //             content: { $first: '$content' },
+            //             answers: { $push: '$answers' }
+            //         }
+            //     }
+            // ]);
+
         } catch (error) {
             res.status(500).json({
                 status: 500,
@@ -84,40 +109,6 @@ class questionController {
             });
         }
     }
-
-    // async getAllCategoryWithQuestionsCount (req: Request, res: Response): Promise<any> {
-    //     try {
-    //         const categories = await categoryModel.aggregate([
-    //             {
-    //                 $lookup: {
-    //                     from: 'questions',
-    //                     localField: '_id',
-    //                     foreignField: 'categories',
-    //                     as: 'questions'
-    //                 }
-    //             },
-    //             {
-    //                 $project: {
-    //                     _id: 1,
-    //                     name: 1,
-    //                     questionCount: { $size: '$questions' }
-    //                 }
-    //             }
-    //         ]);
-
-    //         res.status(200).json({
-    //             status: 200,
-    //             message: 'Categories fetched successfully!',
-    //             data: categories,
-    //         });
-    //     } catch (error) {
-    //         res.status(500).json({
-    //             status: 500,
-    //             message: 'Internal server error!',
-    //             error
-    //         });
-    //     }
-    // }
 }
 
 export default new questionController();
