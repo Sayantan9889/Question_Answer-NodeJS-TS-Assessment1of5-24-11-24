@@ -122,20 +122,82 @@ class questionRepo extends commonRepo {
             throw error;
         }
     }
-    async fetchQuestionwithAnswers(req: Request): Promise<any> {
+    async fetchQuestionwithAnswers(req: Request, questionId: string): Promise<any> {
         try {
-            const userId = req.user?.id;
-            console.log("userId: ", userId);
-
+            const _questionId = new Types.ObjectId(questionId);
             const questions = questionModel.aggregate([
+                {
+                    $match: {
+                        _id: _questionId
+                    }
+                },
                 {
                     $lookup: {
                         from: 'answers',
                         localField: '_id',
                         foreignField: 'question',
+                        pipeline: [
+                            {
+                                $lookup: {
+                                    from: 'users',
+                                    localField: 'user',
+                                    foreignField: '_id',
+                                    as: 'user',
+                                }
+                            },
+                            {
+                                $unwind: {
+                                    path: '$user',
+                                    preserveNullAndEmptyArrays: true,
+                                }
+                            },
+                            {
+                                $project: {
+                                    _id: 1,
+                                    content: 1,
+                                    submittedAt: 1,
+                                    'user._id': 1,
+                                    'user.name': 1,
+                                    'user.email': 1,
+                                    'user.image': 1,
+                                    'user.timeZone': 1,
+                                    userTimezone: 1
+                                }
+                            }
+                        ],
                         as: 'answers'
                     }
-                }
+                },
+                // Adjust the submittedAt field to the user's timezone
+                {
+                    $addFields: {
+                        'answers.submittedAt': {
+                            $map: {
+                                input: '$answers',
+                                as: 'answer',
+                                in: {
+                                    $dateToString: {
+                                        format: '%Y-%m-%d %H:%M:%S',
+                                        date: '$$answer.submittedAt',
+                                        timezone: req.user?.timeZone || '$$answer.userTimezone',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        title: 1,
+                        answers: {
+                            _id: 1,
+                            user: 1,
+                            content: 1,
+                            submittedAt: 1
+                        },
+                    },
+                },
             ]);
             return questions;
         } catch (error) {
